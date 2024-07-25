@@ -12,7 +12,7 @@ import re
 st.set_page_config(layout="wide")
 
 # Initialize the OpenAI client
-client = OpenAI(api_key='sk-proj-veErCuXAjmaECkfR1AjWT3BlbkFJZgswyzwj0sGFww7Q7mPt')
+client = OpenAI()
 
 current_datetime = datetime.now()
 date = current_datetime.strftime("%Y-%m-%d")
