@@ -8,16 +8,14 @@ from openai import OpenAI, AssistantEventHandler
 import base64
 import re
 
-# Set the app to wide mode
-st.set_page_config(layout="wide")
-
-# Initialize the OpenAI client
-client = OpenAI()
-
 st.set_page_config(
     page_title="Instant RAG",
     page_icon="✨",
+    layout="wide"
 )
+
+# Initialize the OpenAI client
+client = OpenAI()
 
 current_datetime = datetime.now()
 date = current_datetime.strftime("%Y-%m-%d")
