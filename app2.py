@@ -9,8 +9,21 @@ import base64
 import re
 from pypdf import PdfWriter, PdfReader
 
-# Set the app to wide mode
-st.set_page_config(layout="wide")
+st.set_page_config(
+    page_title="Instant RAG",
+    page_icon="✨",
+    layout="wide"
+)
+
+hide_streamlit_style = """
+            <style>
+            #root > div:nth-child(1) > div > div > div > div > section > div {padding-top: 0rem;}
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            header {visibility: hidden;}
+            </style>
+            """
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # Initialize the OpenAI client
 client = OpenAI()
