@@ -14,6 +14,11 @@ st.set_page_config(layout="wide")
 # Initialize the OpenAI client
 client = OpenAI()
 
+st.set_page_config(
+    page_title="Instant RAG",
+    page_icon="✨",
+)
+
 current_datetime = datetime.now()
 date = current_datetime.strftime("%Y-%m-%d")
 
