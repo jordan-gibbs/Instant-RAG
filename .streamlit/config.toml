@@ -1,5 +1,9 @@
 [theme]
-primaryColor="#43b39b"
-backgroundColor="#0D1117"
-secondaryBackgroundColor="#000000"
-textColor="#f8f9fb"
+primaryColor = "#2BFF00"
+backgroundColor = "#000000"
+secondaryBackgroundColor = "#141414"
+textColor = "#FFFAFF"
+
+[server]
+enableXsrfProtection = false
+enableCORS = false
