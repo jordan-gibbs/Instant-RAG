@@ -15,6 +15,9 @@ st.set_page_config(
     layout="wide"
 )
 
+with open("style.css") as css:
+    st.markdown( f'<style>{css.read()}</style>' , unsafe_allow_html= True)
+
 hide_streamlit_style = """
             <style>
             #root > div:nth-child(1) > div > div > div > div > section > div {padding-top: 0rem;}
