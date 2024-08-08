@@ -112,7 +112,7 @@ def process_uploaded_files(uploaded_files):
 
 # Streamlit app interface
 st.title("✨Instant RAG")
-st.subheader("Create a retrieval augmented generation (RAG) chatbot with your own data - instantly.")
+st.markdown("#### Create a retrieval augmented generation (RAG) chatbot with your own data - instantly.")
 
 uploaded_files = st.file_uploader("Upload PDF files to chat with", type=["pdf"], accept_multiple_files=True)
 
