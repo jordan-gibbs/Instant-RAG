@@ -149,126 +149,126 @@ if st.session_state.vector_db and st.session_state.project_description:
             encoded_string = base64.b64encode(file.read()).decode('utf-8')
         return encoded_string
 
-    # Main application logic
-    col1, col2 = st.columns(2)
+    # # Main application logic
+    # col1, col2 = st.columns(2)
 
-    with col1:
-        st.markdown('<div style="height: 10px;"></div>', unsafe_allow_html=True)  # Spacer
-        selected_file = st.selectbox("Select a document to preview",
-                                     options=list(st.session_state.uploaded_files_info.keys()))
-        # Check if the selected file has changed
-        if selected_file != st.session_state.previous_selected_file:
-            st.session_state.previous_selected_file = selected_file
-            st.session_state.compressed_file = None  # Reset compressed file
+    # with col1:
+    #     st.markdown('<div style="height: 10px;"></div>', unsafe_allow_html=True)  # Spacer
+    #     selected_file = st.selectbox("Select a document to preview",
+    #                                  options=list(st.session_state.uploaded_files_info.keys()))
+    #     # Check if the selected file has changed
+    #     if selected_file != st.session_state.previous_selected_file:
+    #         st.session_state.previous_selected_file = selected_file
+    #         st.session_state.compressed_file = None  # Reset compressed file
 
-        if selected_file is not None and st.session_state.compressed_file is None:
-            file_path = st.session_state.uploaded_files_info[selected_file]
+    #     if selected_file is not None and st.session_state.compressed_file is None:
+    #         file_path = st.session_state.uploaded_files_info[selected_file]
 
-            # Compress the PDF before displaying
-            with st.spinner("Loading PDF Preview"):
-                compressed_pdf_path = "compressed_example.pdf"
-                compress_pdf(file_path, compressed_pdf_path)
-                base64_pdf = read_pdf(compressed_pdf_path)
-                st.session_state.compressed_file = base64_pdf
+    #         # Compress the PDF before displaying
+    #         with st.spinner("Loading PDF Preview"):
+    #             compressed_pdf_path = "compressed_example.pdf"
+    #             compress_pdf(file_path, compressed_pdf_path)
+    #             base64_pdf = read_pdf(compressed_pdf_path)
+    #             st.session_state.compressed_file = base64_pdf
 
-        if st.session_state.compressed_file:
-            pdf_display = f'''
-                   <iframe src="data:application/pdf;base64,{st.session_state.compressed_file}" 
-                           width="100%" height="1000" 
-                           type="application/pdf"></iframe>
-                   '''
-            st.markdown(pdf_display, unsafe_allow_html=True)
+    #     if st.session_state.compressed_file:
+    #         pdf_display = f'''
+    #                <iframe src="data:application/pdf;base64,{st.session_state.compressed_file}" 
+    #                        width="100%" height="1000" 
+    #                        type="application/pdf"></iframe>
+    #                '''
+    #         st.markdown(pdf_display, unsafe_allow_html=True)
 
-    with col2:
-        # Chat input container at the top
-        with st.container():
-            st.markdown('<div class="chat-input-container">', unsafe_allow_html=True)
-            st.subheader("📄Chat with Documents")
-            st.markdown("---")
-            prompt = st.chat_input(placeholder="Ask anything about your PDF files")
-            st.markdown('</div>', unsafe_allow_html=True)
 
-        if prompt:
-            # Add user message to chat history
-            if st.session_state.first_message:
-                st.session_state.messages.append({"role": "user", "content": f"{prompt}{prompt_injection_v1}"})
-                st.session_state.first_message = False
-            else:
-                st.session_state.messages.append({"role": "user", "content": f"{prompt}{prompt_injection}"})
+    # Chat input container at the top
+    with st.container():
+        st.markdown('<div class="chat-input-container">', unsafe_allow_html=True)
+        st.subheader("📄Chat with Documents")
+        st.markdown("---")
+        prompt = st.chat_input(placeholder="Ask anything about your PDF files")
+        st.markdown('</div>', unsafe_allow_html=True)
 
-            # Create the assistant with file search capability
-            assistant = client.beta.assistants.create(
-                instructions=f"You are a document analyst for {st.session_state.project_description}. You only have one dataset available to you, which is a collection of PDFs. You will use this knowledge base to answer questions that the user has about this dataset."
-                             f"You will never output anything that isn't directly available in the documents attached to you. The date is {date}.",
-                model="gpt-4o",
-                tools=[{"type": "file_search"}],
-                tool_resources={
-                    "file_search": {
-                        "vector_store_ids": [f"{st.session_state.vector_db}"]
-                    }
+    if prompt:
+        # Add user message to chat history
+        if st.session_state.first_message:
+            st.session_state.messages.append({"role": "user", "content": f"{prompt}{prompt_injection_v1}"})
+            st.session_state.first_message = False
+        else:
+            st.session_state.messages.append({"role": "user", "content": f"{prompt}{prompt_injection}"})
+
+        # Create the assistant with file search capability
+        assistant = client.beta.assistants.create(
+            instructions=f"You are a document analyst for {st.session_state.project_description}. You only have one dataset available to you, which is a collection of PDFs. You will use this knowledge base to answer questions that the user has about this dataset."
+                         f"You will never output anything that isn't directly available in the documents attached to you. The date is {date}.",
+            model="gpt-4o",
+            tools=[{"type": "file_search"}],
+            tool_resources={
+                "file_search": {
+                    "vector_store_ids": [f"{st.session_state.vector_db}"]
                 }
-            )
+            }
+        )
 
-            # Create a new thread for each user interaction
-            thread = client.beta.threads.create(
-                messages=st.session_state.messages,
-                tool_resources={
-                    "file_search": {
-                        "vector_store_ids": [f"{st.session_state.vector_db}"]
-                    }
+        # Create a new thread for each user interaction
+        thread = client.beta.threads.create(
+            messages=st.session_state.messages,
+            tool_resources={
+                "file_search": {
+                    "vector_store_ids": [f"{st.session_state.vector_db}"]
                 }
-            )
+            }
+        )
 
 
-            class EventHandler(AssistantEventHandler):
-                @override
-                def on_text_created(self, text) -> None:
-                    print(f"\nassistant > ", end="", flush=True)
+        class EventHandler(AssistantEventHandler):
+            @override
+            def on_text_created(self, text) -> None:
+                print(f"\nassistant > ", end="", flush=True)
 
-                @override
-                def on_tool_call_created(self, tool_call):
-                    print(f"\nassistant > {tool_call.type}\n", flush=True)
+            @override
+            def on_tool_call_created(self, tool_call):
+                print(f"\nassistant > {tool_call.type}\n", flush=True)
 
-                @override
-                def on_message_done(self, message) -> None:
-                    import urllib.parse
+            @override
+            def on_message_done(self, message) -> None:
+                import urllib.parse
 
-                    # Process the assistant's message to handle annotations and citations
-                    message_content = message.content[0].text
-                    message_text = message_content.value
-                    print(f"Original message content: {message_text}")
+                # Process the assistant's message to handle annotations and citations
+                message_content = message.content[0].text
+                message_text = message_content.value
+                print(f"Original message content: {message_text}")
 
-                    annotations = message_content.annotations
+                annotations = message_content.annotations
 
-                    # Process each annotation
-                    for index, annotation in enumerate(annotations):
-                        index += 1  # Adjust for 1-based citation indexing
+                # Process each annotation
+                for index, annotation in enumerate(annotations):
+                    index += 1  # Adjust for 1-based citation indexing
 
-                        # Handle file citations
-                        if file_citation := getattr(annotation, "file_citation", None):
-                            cited_file = client.files.retrieve(file_citation.file_id)
-                            filename = st.session_state.uploaded_files_info.get(cited_file.filename, cited_file.filename)
-                            message_text = re.sub(r"【.*?】", f" [**{filename}**]", message_text)
+                    # Handle file citations
+                    if file_citation := getattr(annotation, "file_citation", None):
+                        cited_file = client.files.retrieve(file_citation.file_id)
+                        filename = st.session_state.uploaded_files_info.get(cited_file.filename, cited_file.filename)
+                        message_text = re.sub(r"【.*?】", f" [**{filename}**]", message_text)
 
-                    # Escape dollar signs in the message text
-                    escaped_content = message_text.replace("$", "\\$")
+                # Escape dollar signs in the message text
+                escaped_content = message_text.replace("$", "\\$")
 
-                    # Add assistant response to chat history
-                    st.session_state.messages.append({"role": "assistant", "content": escaped_content})
+                # Add assistant response to chat history
+                st.session_state.messages.append({"role": "assistant", "content": escaped_content})
 
-            # Generate assistant response with event handling
-            with st.spinner('Thinking...'):
-                with client.beta.threads.runs.stream(
-                        thread_id=thread.id,
-                        assistant_id=assistant.id,
-                        instructions=f"The user has a premium account. The user did not upload the documents, it's a database. The date is {date}. Please always be exact with your output.",
-                        event_handler=EventHandler(),
-                ) as stream:
-                    stream.until_done()
+        # Generate assistant response with event handling
+        with st.spinner('Thinking...'):
+            with client.beta.threads.runs.stream(
+                    thread_id=thread.id,
+                    assistant_id=assistant.id,
+                    instructions=f"The user has a premium account. The user did not upload the documents, it's a database. The date is {date}. Please always be exact with your output.",
+                    event_handler=EventHandler(),
+            ) as stream:
+                stream.until_done()
 
-        # Display chat messages from history on app rerun
-        for message in reversed(st.session_state.messages):
-            cleaned_content = message["content"].replace(prompt_injection, "")
-            cleaned_content = cleaned_content.replace(prompt_injection_v1, "")
-            with st.chat_message(message["role"]):
-                st.markdown(cleaned_content)
+    # Display chat messages from history on app rerun
+    for message in reversed(st.session_state.messages):
+        cleaned_content = message["content"].replace(prompt_injection, "")
+        cleaned_content = cleaned_content.replace(prompt_injection_v1, "")
+        with st.chat_message(message["role"]):
+            st.markdown(cleaned_content)
