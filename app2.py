@@ -12,7 +12,7 @@ from pypdf import PdfWriter, PdfReader
 st.set_page_config(
     page_title="Instant RAG",
     page_icon="✨",
-    layout="wide"
+    # layout="wide"
 )
 
 with open("style.css") as css:
@@ -112,7 +112,7 @@ def process_uploaded_files(uploaded_files):
 
 # Streamlit app interface
 st.title("✨Instant RAG")
-st.markdown("#### Create a retrieval augmented generation (RAG) chatbot with your own data - instantly.")
+st.markdown("###### Create a retrieval augmented generation (RAG) chatbot with your own data - instantly.")
 
 uploaded_files = st.file_uploader("Upload PDF files to chat with", type=["pdf"], accept_multiple_files=True)
 
