@@ -12,7 +12,7 @@ from pypdf import PdfWriter, PdfReader
 st.set_page_config(
     page_title="Instant RAG",
     page_icon="✨",
-    # layout="wide"
+    layout="wide"
 )
 
 with open("style.css") as css:
